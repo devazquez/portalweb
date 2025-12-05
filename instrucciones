@@ -1,0 +1,22 @@
+1) implimentar un sistema funcional de un portal web (frontend) desarrollado con Vue.js 3, que consuma y despliegue datos desde dos 
+fuentes de forma simultánea, dichas fuentes deberán de utilizar un repositorio Omeka-S y un CMS headless, que proveerán información 
+sobre recursos digitales y contenidos asociados a éstos respectivamente. Características del desarrollo:
+a) Los servicios del portal, el repositorio y el CMS deberán estar preparados para su despliegue en producción mediante contenedores 
+independientes utilizando docker y docker-compose para la gestión de éstos. Las bases de datos de todos los servicios deberán
+desplegarse en otro sistema aislado.
+b) Se deben generar imágenes propias para los contenedores de la aplicación Vue.js, el CMS y el repositorio  Omeka-S. Las cuales 
+deberán ser almacenadas en un registro público de imágenes.
+c) El desarrollo de la interfaz web deberá permitir su correcta visualización en dispositivos móviles y de escritorio (diseño web 
+responsivo), presentando de manera estructurada los contenidos obtenidos del CMS y del repositorio Omeka-S, incorporando elementos 
+de navegación y búsqueda.
+d) Implementar buenas prácticas de seguridad para el sistema y la protección de datos personales. 
+e) REvisa los documentos en la carpeta assets y docs
+f) Emplea el diseño web, colores y tipografías que emplea el portal web https://www.iis.unam.mx/
+g) Emplea un logo similar al que se encuentra en la carpeta assets
+
+2) Presentar la documentación técnica del prototipo en un máximo de 40 cuartillas, en donde describa el desarrollo. Entregar el código
+ fuente en un repositorio público Git e incluir un archivo README.md con instrucciones de instalación y despliegue del desarrollo.
+
+3) Réplica oral y demostración del correcto funcionamiento del prototipo. En caso de no presentar alguna de las pruebas mencionadas, se
+entenderá que el concursante habrá declinado su participación en el concurso
+

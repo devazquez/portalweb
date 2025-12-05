@@ -1,0 +1,51 @@
+# Dependencias
+node_modules/
+package-lock.json
+yarn.lock
+
+# Build y dist
+dist/
+.dist/
+build/
+
+# Variables de entorno
+.env
+.env.local
+.env.*.local
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Docker
+.dockerignore
+docker-compose.override.yml
+
+# Test coverage
+coverage/
+.nyc_output/
+
+# Misc
+.cache/
+.eslintcache
+dist-ssr
+*.local
+
+# Production databases
+*.db
+*.sqlite
+*.pem
+
+# OS
+Thumbs.db
+.DS_Store
