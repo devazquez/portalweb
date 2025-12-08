@@ -369,9 +369,10 @@ docker-compose -f docker-compose.yml up -d --build
 ## 📞 Soporte y Contacto
 
 **Instituto de Investigaciones Sociales UNAM**
-- Email: info@iis.unam.mx
-- Sitio: https://www.iis.unam.mx/
-- Teléfono: +52 55 XXXX XXXX
+•	Desarrollador: Dario Emmanuel Vázquez Ceballos
+•	Email: darioemmanuel@ciencias.unam.mx
+•	Teléfono: +52 55 7391 5092
+
 
 ## 📄 Licencia
 
@@ -413,6 +414,7 @@ Las contribuciones son bienvenidas. Por favor:
 
 ---
 
-**Última actualización:** Diciembre 2024
+**Última actualización:** Diciembre 2025
 **Versión:** 1.0.0
-**Estado:** Producción
+**Estado:** Desarrollo
+**Autor** Dario Emmanuel Vázquez Ceballos 

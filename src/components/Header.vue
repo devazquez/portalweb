@@ -63,7 +63,7 @@ const handleSearch = async () => {
 
 .logo {
   flex-shrink: 0;
-  width: 80px;
+  width: 280px;
 }
 
 .logo-img {
@@ -158,7 +158,7 @@ const handleSearch = async () => {
   }
 
   .logo {
-    width: 60px;
+    width: 200px;
     align-self: flex-start;
   }
 

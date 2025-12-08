@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   # Aplicación Vue.js Frontend
   portal:
@@ -37,13 +35,13 @@ services:
       - OMEKA_SITE_SLUG=iis
       - OMEKA_API_ENABLED=true
       - OMEKA_API_KEY_ENABLED=true
-      - MYSQL_HOST=omeka-db
+      - MYSQL_HOST=db
       - MYSQL_DATABASE=omeka
       - MYSQL_USER=omeka
       - MYSQL_PASSWORD=omeka_password
       - MYSQL_ROOT_PASSWORD=root_password
     depends_on:
-      omeka-db:
+      db:
         condition: service_healthy
     volumes:
       - omeka_files:/var/www/html/files
@@ -59,16 +57,16 @@ services:
       start_period: 60s
 
   # Base de datos de Omeka
-  omeka-db:
+  db:
     image: mysql:8.0
     container_name: iis-omeka-db
+    command: --default-authentication-plugin=mysql_native_password --default-password-lifetime=0 --bind-address=0.0.0.0
     environment:
       - MYSQL_ROOT_PASSWORD=root_password
       - MYSQL_DATABASE=omeka
-      - MYSQL_USER=omeka
-      - MYSQL_PASSWORD=omeka_password
     volumes:
       - omeka_db:/var/lib/mysql
+      - ./init-mysql.sql:/docker-entrypoint-initdb.d/init.sql
     networks:
       - iis-network
     restart: unless-stopped

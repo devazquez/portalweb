@@ -6,7 +6,7 @@
           <h4>Instituto de Investigaciones Sociales</h4>
           <p>UNAM - Universidad Nacional Autónoma de México</p>
           <p class="contact-info">
-            📧 <a href="mailto:info@iis.unam.mx">info@iis.unam.mx</a>
+            📧 <a href="mailto:darioemmanuel@fciencias.unam.mx">darioemmanuel@fciencias.unam.mx</a>
           </p>
         </div>
         <div class="footer-section">
@@ -30,7 +30,7 @@
       </div>
       <div class="footer-bottom">
         <p>&copy; 2024 Instituto de Investigaciones Sociales, UNAM. Todos los derechos reservados.</p>
-        <p class="footer-tech">Portal desarrollado con Vue.js 3</p>
+        <p class="footer-tech">Portal desarrollado con Vue.js 3 por Dario Emmanuel Vázquez Ceballos</p>
       </div>
     </div>
   </footer>

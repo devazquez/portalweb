@@ -120,7 +120,7 @@
           <div class="contact-methods">
             <div class="contact-method">
               <strong>📧 Email:</strong>
-              <a href="mailto:info@iis.unam.mx">info@iis.unam.mx</a>
+              <a href="mailto:darioemmanuel@ciencias.unam.mx">darioemmanuel@ciencias.unam.mx</a>
             </div>
             <div class="contact-method">
               <strong>🌐 Sitio Web:</strong>
@@ -128,7 +128,7 @@
             </div>
             <div class="contact-method">
               <strong>📞 Teléfono:</strong>
-              <span>+52 55 XXXX XXXX</span>
+              <span>+52 55 7391 5092</span>
             </div>
           </div>
         </div>
