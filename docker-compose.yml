@@ -26,7 +26,9 @@ services:
 
   # Repositorio Omeka-S
   omeka:
-    image: omeka/omeka-s:latest
+    build:
+      context: .
+      dockerfile: Dockerfile.omeka
     container_name: iis-omeka
     ports:
       - "8081:80"

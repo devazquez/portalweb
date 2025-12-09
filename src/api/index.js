@@ -3,8 +3,14 @@ import DOMPurify from 'dompurify'
 
 // Configuración de variables de entorno
 const OMEKA_API_URL = import.meta.env.VITE_OMEKA_API_URL || 'http://localhost:8081/api'
-const CMS_API_URL = import.meta.env.VITE_CMS_API_URL || 'http://localhost:8082/api'
+const CMS_API_URL = import.meta.env.VITE_CMS_API_URL || 'http://localhost:1337/api'
 const API_TIMEOUT = 30000
+
+console.log('🔧 API Configuration:', {
+  OMEKA_API_URL,
+  CMS_API_URL,
+  API_TIMEOUT
+})
 
 // Crear instancias de axios con configuraciones separadas
 const omekaClient = axios.create({
@@ -68,15 +74,39 @@ export const isValidUrl = (urlString) => {
 // Funciones de API
 export const fetchOmekaResources = async (params = {}) => {
   try {
+    console.log('📡 Fetching Omeka resources from:', OMEKA_API_URL)
     const response = await omekaClient.get('/items', { params })
-    // Sanitizar datos recibidos
-    const sanitizedData = response.data.map(item => ({
-      ...item,
-      title: sanitizeHTML(item.title || ''),
-      description: sanitizeHTML(item.description || '')
+    console.log('✅ Omeka response received:', response.data)
+    
+    // Omeka puede devolver { value: [...], Count: N } o directamente [...]
+    let items = response.data.value || response.data
+    // Si no es array, convertir a array
+    if (!Array.isArray(items)) {
+      items = [items]
+    }
+    console.log('📦 Processing', items.length, 'items from Omeka')
+    
+    const sanitizedData = items.map(item => ({
+      // ID y metadatos básicos de Omeka
+      id: item['o:id'],
+      title: item['dcterms:title']?.[0]?.['@value'] || 'Sin título',
+      description: item['dcterms:description']?.[0]?.['@value'] || '',
+      subject: item['dcterms:subject']?.[0]?.['@value'] || '',
+      
+      // Campos esperados por el componente (con valores por defecto)
+      type: 'Recurso', // Omeka no proporciona tipo de manera estándar
+      image_url: null, // Las imágenes en Omeka están en items relacionados
+      author: item['dcterms:creator']?.[0]?.['@value'] || 'Autor desconocido',
+      created: item['o:created']?.['@value'] || null,
+      tags: item['dcterms:subject'] ? [item['dcterms:subject'][0]['@value']] : [],
+      
+      // Campo para identificar la fuente
+      source: 'omeka'
     }))
+    console.log('🎯 Sanitized data ready:', sanitizedData)
     return sanitizedData
   } catch (error) {
+    console.error('❌ Error fetching Omeka resources:', error)
     throw error
   }
 }
@@ -87,10 +117,22 @@ export const fetchOmekaResourceById = async (id) => {
       throw new Error('ID de recurso inválido')
     }
     const response = await omekaClient.get(`/items/${id}`)
+    const item = response.data
     return {
-      ...response.data,
-      title: sanitizeHTML(response.data.title || ''),
-      description: sanitizeHTML(response.data.description || '')
+      // ID y metadatos básicos de Omeka
+      id: item['o:id'],
+      title: item['dcterms:title']?.[0]?.['@value'] || 'Sin título',
+      description: item['dcterms:description']?.[0]?.['@value'] || '',
+      subject: item['dcterms:subject']?.[0]?.['@value'] || '',
+      
+      // Campos esperados por el componente
+      type: 'Recurso',
+      image_url: null,
+      author: item['dcterms:creator']?.[0]?.['@value'] || 'Autor desconocido',
+      created: item['o:created']?.['@value'] || null,
+      tags: item['dcterms:subject'] ? [item['dcterms:subject'][0]['@value']] : [],
+      
+      source: 'omeka'
     }
   } catch (error) {
     throw error
@@ -100,14 +142,17 @@ export const fetchOmekaResourceById = async (id) => {
 export const fetchCMSContent = async (params = {}) => {
   try {
     const response = await cmsClient.get('/content', { params })
-    const sanitizedData = response.data.map(item => ({
-      ...item,
-      title: sanitizeHTML(item.title || ''),
-      body: sanitizeHTML(item.body || '')
+    const items = response.data.data || response.data
+    const sanitizedData = (Array.isArray(items) ? items : []).map(item => ({
+      id: item.id,
+      title: item.title || '',
+      body: item.body || '',
+      source: 'cms'
     }))
     return sanitizedData
   } catch (error) {
-    throw error
+    console.warn('CMS API no disponible:', error.message)
+    return []
   }
 }
 
@@ -117,10 +162,12 @@ export const fetchCMSContentById = async (id) => {
       throw new Error('ID de contenido inválido')
     }
     const response = await cmsClient.get(`/content/${id}`)
+    const item = response.data.data || response.data
     return {
-      ...response.data,
-      title: sanitizeHTML(response.data.title || ''),
-      body: sanitizeHTML(response.data.body || '')
+      id: item.id,
+      title: item.title || '',
+      body: item.body || '',
+      source: 'cms'
     }
   } catch (error) {
     throw error
@@ -143,10 +190,22 @@ export const searchResources = async (query, source = 'all') => {
         const omekaResults = await omekaClient.get('/items', {
           params: { search: searchQuery }
         })
-        results = results.concat(omekaResults.data.map(item => ({
-          ...item,
-          source: 'omeka',
-          title: sanitizeHTML(item.title || '')
+        let items = omekaResults.data.value || omekaResults.data
+        // Si no es array, convertir a array
+        if (!Array.isArray(items)) {
+          items = [items]
+        }
+        results = results.concat(items.map(item => ({
+          id: item['o:id'],
+          title: item['dcterms:title']?.[0]?.['@value'] || 'Sin título',
+          description: item['dcterms:description']?.[0]?.['@value'] || '',
+          subject: item['dcterms:subject']?.[0]?.['@value'] || '',
+          type: 'Recurso',
+          image_url: null,
+          author: item['dcterms:creator']?.[0]?.['@value'] || 'Autor desconocido',
+          created: item['o:created']?.['@value'] || null,
+          tags: item['dcterms:subject'] ? [item['dcterms:subject'][0]['@value']] : [],
+          source: 'omeka'
         })))
       } catch (err) {
         console.error('Omeka search error:', err)
@@ -158,10 +217,12 @@ export const searchResources = async (query, source = 'all') => {
         const cmsResults = await cmsClient.get('/search', {
           params: { query: searchQuery }
         })
-        results = results.concat(cmsResults.data.map(item => ({
-          ...item,
-          source: 'cms',
-          title: sanitizeHTML(item.title || '')
+        const items = cmsResults.data.data || cmsResults.data
+        results = results.concat((Array.isArray(items) ? items : []).map(item => ({
+          id: item.id,
+          title: item.title || '',
+          body: item.body || '',
+          source: 'cms'
         })))
       } catch (err) {
         console.error('CMS search error:', err)

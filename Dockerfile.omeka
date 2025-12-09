@@ -1,0 +1,14 @@
+FROM omeka/omeka-s:latest
+
+# Copiar .htaccess con CORS habilitado
+COPY .htaccess-cors /var/www/html/.htaccess
+
+# Asegurar permisos correctos
+RUN chown www-data:www-data /var/www/html/.htaccess && \
+    chmod 644 /var/www/html/.htaccess
+
+# Habilitar mod_headers si no está habilitado
+RUN a2enmod headers rewrite
+
+# Reiniciar Apache para aplicar cambios
+RUN service apache2 restart || true

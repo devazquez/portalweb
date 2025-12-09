@@ -187,7 +187,7 @@ const performSearch = async () => {
   hasSearched.value = true
   
   try {
-    await resourceStore.search(searchQuery.value)
+    await resourceStore.search(searchQuery.value, searchSource.value)
     results.value = resourceStore.omekaResources
     
     // Aplicar filtros adicionales localmente

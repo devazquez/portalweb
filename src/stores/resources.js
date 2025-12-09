@@ -50,12 +50,12 @@ export const useResourceStore = defineStore('resources', () => {
     }
   }
 
-  async function search(query) {
+  async function search(query, source = 'all') {
     searchQuery.value = query
     loading.value = true
     error.value = null
     try {
-      const results = await searchResources(query)
+      const results = await searchResources(query, source)
       omekaResources.value = results
     } catch (err) {
       error.value = err.message || 'Error en la búsqueda'
