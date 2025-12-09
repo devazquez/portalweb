@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel Administrativo - CMS Simple</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h1>📰 CMS Admin</h1>
+                <p class="version">v1.0</p>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="#" class="nav-item active" data-section="dashboard">
+                    <span class="icon">📊</span>
+                    <span class="label">Dashboard</span>
+                </a>
+                <a href="#" class="nav-item" data-section="articulos">
+                    <span class="icon">📝</span>
+                    <span class="label">Artículos</span>
+                </a>
+                <a href="#" class="nav-item" data-section="crear">
+                    <span class="icon">➕</span>
+                    <span class="label">Crear Artículo</span>
+                </a>
+                <a href="#" class="nav-item" data-section="configuracion">
+                    <span class="icon">⚙️</span>
+                    <span class="label">Configuración</span>
+                </a>
+            </nav>
+            <div class="sidebar-footer">
+                <p class="info">Portal IIS</p>
+                <p class="date" id="currentDate"></p>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Header -->
+            <header class="header">
+                <div class="header-left">
+                    <h2 id="pageTitle">Dashboard</h2>
+                </div>
+                <div class="header-right">
+                    <button class="btn btn-primary btn-lg" id="newArticleBtn">
+                        ➕ Nuevo Artículo
+                    </button>
+                </div>
+            </header>
+
+            <!-- Content Area -->
+            <div class="content">
+                <!-- Dashboard Section -->
+                <section id="dashboard-section" class="section active">
+                    <div class="dashboard-grid">
+                        <div class="stats-card">
+                            <div class="stats-icon">📚</div>
+                            <div class="stats-content">
+                                <p class="stats-label">Total de Artículos</p>
+                                <p class="stats-number" id="totalArticles">0</p>
+                            </div>
+                        </div>
+                        <div class="stats-card">
+                            <div class="stats-icon">✍️</div>
+                            <div class="stats-content">
+                                <p class="stats-label">Artículos Hoy</p>
+                                <p class="stats-number" id="todayArticles">0</p>
+                            </div>
+                        </div>
+                        <div class="stats-card">
+                            <div class="stats-icon">🔤</div>
+                            <div class="stats-content">
+                                <p class="stats-label">Palabras Totales</p>
+                                <p class="stats-number" id="totalWords">0</p>
+                            </div>
+                        </div>
+                        <div class="stats-card">
+                            <div class="stats-icon">⏰</div>
+                            <div class="stats-content">
+                                <p class="stats-label">Última Actualización</p>
+                                <p class="stats-time" id="lastUpdate">-</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="dashboard-section">
+                        <h3>📈 Artículos Recientes</h3>
+                        <div class="recent-articles" id="recentArticles">
+                            <p class="empty-state">Cargando artículos...</p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Artículos Section -->
+                <section id="articulos-section" class="section">
+                    <div class="section-header">
+                        <h3>Gestión de Artículos</h3>
+                        <div class="search-bar">
+                            <input 
+                                type="text" 
+                                id="searchInput" 
+                                class="search-input" 
+                                placeholder="🔍 Buscar artículos..."
+                            >
+                        </div>
+                    </div>
+
+                    <div class="articles-table-container">
+                        <table class="articles-table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Título</th>
+                                    <th>Descripción</th>
+                                    <th>Creado</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="articlesTableBody">
+                                <tr>
+                                    <td colspan="5" class="text-center">Cargando artículos...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="pagination" id="pagination">
+                        <!-- Pagination buttons will be inserted here -->
+                    </div>
+                </section>
+
+                <!-- Crear Artículo Section -->
+                <section id="crear-section" class="section">
+                    <h3>Crear Nuevo Artículo</h3>
+                    <form id="articleForm" class="article-form">
+                        <div class="form-group">
+                            <label for="title">Título *</label>
+                            <input 
+                                type="text" 
+                                id="title" 
+                                name="title" 
+                                class="form-input" 
+                                placeholder="Ingresa el título del artículo"
+                                required
+                            >
+                            <span class="error-message" id="titleError"></span>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="description">Descripción *</label>
+                            <textarea 
+                                id="description" 
+                                name="description" 
+                                class="form-textarea" 
+                                rows="3"
+                                placeholder="Ingresa una descripción breve"
+                                required
+                            ></textarea>
+                            <span class="error-message" id="descriptionError"></span>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="body">Contenido *</label>
+                            <textarea 
+                                id="body" 
+                                name="body" 
+                                class="form-textarea" 
+                                rows="10"
+                                placeholder="Ingresa el contenido completo del artículo"
+                                required
+                            ></textarea>
+                            <span class="error-message" id="bodyError"></span>
+                            <p class="char-count">
+                                <span id="charCount">0</span> caracteres
+                            </p>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="author">Autor</label>
+                            <input 
+                                type="text" 
+                                id="author" 
+                                name="author" 
+                                class="form-input" 
+                                placeholder="Nombre del autor (opcional)"
+                            >
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-success">💾 Guardar Artículo</button>
+                            <button type="reset" class="btn btn-secondary">🔄 Limpiar</button>
+                        </div>
+                    </form>
+                </section>
+
+                <!-- Configuración Section -->
+                <section id="configuracion-section" class="section">
+                    <h3>Configuración del Sistema</h3>
+                    <div class="config-panel">
+                        <div class="config-item">
+                            <h4>Información del Sistema</h4>
+                            <div class="config-info">
+                                <p><strong>Aplicación:</strong> CMS Simple</p>
+                                <p><strong>Versión:</strong> 1.0</p>
+                                <p><strong>Base de Datos:</strong> JSON</p>
+                                <p><strong>Ubicación:</strong> data.json</p>
+                                <p><strong>API URL:</strong> http://localhost:1337/api</p>
+                            </div>
+                        </div>
+
+                        <div class="config-item">
+                            <h4>Acciones</h4>
+                            <div class="config-actions">
+                                <button class="btn btn-warning" id="exportBtn">📥 Exportar Datos</button>
+                                <button class="btn btn-danger" id="clearBtn">🗑️ Limpiar Artículos</button>
+                            </div>
+                        </div>
+
+                        <div class="config-item">
+                            <h4>Estadísticas</h4>
+                            <div class="config-stats" id="configStats">
+                                <p>Cargando estadísticas...</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal para editar artículos -->
+    <div id="editModal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Editar Artículo</h2>
+                <button class="close-btn" id="closeModal">&times;</button>
+            </div>
+            <form id="editForm" class="article-form">
+                <input type="hidden" id="editId" name="id">
+                
+                <div class="form-group">
+                    <label for="editTitle">Título *</label>
+                    <input 
+                        type="text" 
+                        id="editTitle" 
+                        name="title" 
+                        class="form-input" 
+                        required
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label for="editDescription">Descripción *</label>
+                    <textarea 
+                        id="editDescription" 
+                        name="description" 
+                        class="form-textarea" 
+                        rows="3"
+                        required
+                    ></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="editBody">Contenido *</label>
+                    <textarea 
+                        id="editBody" 
+                        name="body" 
+                        class="form-textarea" 
+                        rows="10"
+                        required
+                    ></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="editAuthor">Autor</label>
+                    <input 
+                        type="text" 
+                        id="editAuthor" 
+                        name="author" 
+                        class="form-input"
+                    >
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-success">💾 Actualizar</button>
+                    <button type="button" class="btn btn-secondary" id="cancelBtn">❌ Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div id="toast" class="toast hidden"></div>
+
+    <script src="script.js"></script>
+</body>
+</html>

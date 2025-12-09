@@ -189,6 +189,11 @@ async function initializeData() {
   }
 }
 
+// Ruta para servir el panel administrativo
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
 // Iniciar servidor
 initializeData().then(() => {
   app.listen(PORT, () => {
