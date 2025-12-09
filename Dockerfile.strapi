@@ -1,0 +1,11 @@
+FROM strapi/strapi:latest
+
+# Crear directorio de configuración
+RUN mkdir -p /srv/app/config/plugins
+
+# Copiar archivo de configuración para habilitar REST API
+COPY strapi-config/plugins.js /srv/app/config/plugins.js
+
+EXPOSE 1337
+
+CMD ["npm", "start"]

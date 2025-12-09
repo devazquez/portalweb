@@ -96,7 +96,10 @@
                 </div>
 
                 <router-link 
-                  :to="`/resource/${resource.id}`" 
+                  :to="{
+                    path: `/resource/${resource.id}`,
+                    query: resource.source ? { source: resource.source } : {}
+                  }" 
                   class="btn btn-primary w-100"
                 >
                   Ver Recurso Completo

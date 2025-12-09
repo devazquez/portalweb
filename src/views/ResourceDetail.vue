@@ -116,7 +116,13 @@
                       <img :src="related.image_url || '/placeholder.jpg'" :alt="related.title">
                     </div>
                     <h4>{{ truncateText(related.title, 50) }}</h4>
-                    <router-link :to="`/resource/${related.id}`" class="related-link">
+                    <router-link 
+                      :to="{
+                        path: `/resource/${related.id}`,
+                        query: related.source ? { source: related.source } : {}
+                      }" 
+                      class="related-link"
+                    >
                       Ver más →
                     </router-link>
                   </div>
@@ -179,8 +185,8 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
-import { useResourceStore } from '@/stores/resources'
-import { fetchOmekaResourceById, sanitizeHTML } from '@/api'
+import { useResourceStore } from '../stores/resources'
+import { fetchOmekaResourceById, fetchCMSContentById, sanitizeHTML } from '../api'
 
 const route = useRoute()
 const resourceStore = useResourceStore()
@@ -259,7 +265,20 @@ onMounted(async () => {
   
   try {
     const id = route.params.id
-    resource.value = await fetchOmekaResourceById(id)
+    const source = route.query.source || 'omeka' // detecta la fuente desde la query string
+    
+    if (source === 'cms') {
+      // Cargar artículo del CMS
+      const cmsContent = await fetchCMSContentById(id)
+      resource.value = {
+        ...cmsContent,
+        type: 'Artículo',
+        source: 'cms'
+      }
+    } else {
+      // Cargar recurso de Omeka (default)
+      resource.value = await fetchOmekaResourceById(id)
+    }
   } catch (err) {
     error.value = 'No se pudo cargar el recurso. Por favor intenta más tarde.'
     console.error('Error loading resource:', err)

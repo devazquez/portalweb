@@ -63,6 +63,31 @@ Una vez que configures Strapi, el portal automáticamente:
 Si ves errores como `CMS API error: ... 404`, es porque Strapi aún no tiene content types.
 Estos errores se manejan gracefully y no afectan el funcionamiento del portal.
 
+## Solución alternativa: Crear content type vía GraphQL o datos SQL
+
+Si el Content-Type Builder en el admin panel no funciona, puedes:
+
+1. **Crear artículo de prueba manualmente** en la BD:
+```bash
+docker exec iis-cms-db psql -U strapi -d strapi -c \
+  "INSERT INTO documents (slug, locale) VALUES ('articulo-1', 'en') RETURNING id;"
+```
+
+2. **O usar la UI simplificada**: 
+   - Ve a http://localhost:1337/admin
+   - Si ves "Articulo" en el menú izquierdo, haz clic
+   - Luego "Create new entry"
+   - Llena los campos
+
+## Verificar que la API REST está disponible
+
+```bash
+# Si esto devuelve datos, REST API funciona:
+curl -i http://localhost:1337/api/articulos
+
+# Si devuelve 404, la API REST aún no está habilitada
+```
+
 ## Próximos pasos opcionales
 1. Configurar autenticación en Strapi (JWT)
 2. Crear plugins de búsqueda más avanzados

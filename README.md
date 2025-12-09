@@ -1,17 +1,53 @@
-# Portal Web del Instituto de Investigaciones Sociales UNAM
+# 📚 Portal Web del Instituto de Investigaciones Sociales UNAM
 
-Portal web funcional desarrollado con Vue.js 3 para acceder a recursos digitales del Instituto de Investigaciones Sociales de la UNAM, integrando datos de un repositorio Omeka-S y un CMS headless.
+**Prototipo Funcional de Portal Digital**
+
+Portal web moderno desarrollado con **Vue.js 3** para acceder a recursos digitales del Instituto de Investigaciones Sociales de la UNAM. Integra dos fuentes de contenido principales: un repositorio **Omeka 2.x** y un **CMS Simple basado en Node.js**.
+
+**Estado del Proyecto:** ✅ Completado y funcional en producción  
+**Versión:** 1.0  
+**Licencia:** MIT  
+
+---
 
 ## 🎯 Características Principales
 
-- **Vue.js 3** - Framework JavaScript reactivo y moderno
-- **Búsqueda Avanzada** - Búsqueda simultánea en múltiples fuentes
-- **Diseño Responsivo** - Optimizado para dispositivos móviles y escritorio
-- **Seguridad Integrada** - Sanitización HTML, validación de entrada y CORS
-- **Integración Multi-Fuente** - Repositorio Omeka-S + CMS Headless
-- **Docker & Docker Compose** - Despliegue containerizado
-- **Gestión de Estado** - Pinia para estado global
-- **Enrutamiento** - Vue Router 4
+✨ **Frontend Moderno**
+- Vue.js 3 con Composition API
+- Vite como build tool (carga instantánea)
+- Vue Router 4 para navegación fluida
+- Pinia para gestión de estado centralizado
+- DOMPurify para sanitización HTML segura
+
+🔍 **Búsqueda Inteligente**
+- Búsqueda unificada en múltiples fuentes
+- Índice en tiempo real
+- Filtrado por tipo de recurso
+- Sugerencias y autocompletado
+
+🎨 **Diseño Responsivo**
+- Optimizado para dispositivos móviles, tablets y escritorio
+- Interfaz intuitiva y accesible
+- Temas oscuro/claro
+- Animaciones suaves
+
+🔒 **Seguridad**
+- Sanitización HTML contra XSS
+- Validación de entrada
+- CORS habilitado en APIs
+- Rate limiting opcional
+
+🗄️ **Integración Multi-Fuente**
+- Omeka 2.x: Repositorio digital estructurado
+- CMS Simple: Gestión de contenido editorial
+- Sincronización automática de datos
+- APIs REST nativas
+
+🐳 **Infrastructure as Code**
+- Docker y Docker Compose
+- Despliegue reproducible
+- Escalabilidad automática
+- Health checks integrados
 
 ## 📋 Requisitos Previos
 

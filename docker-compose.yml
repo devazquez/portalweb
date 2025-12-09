@@ -78,56 +78,25 @@ services:
       timeout: 5s
       retries: 5
 
-  # CMS Headless (Strapi - alternativa popular)
+  # CMS Simple - API basada en JSON
   cms:
-    image: strapi/strapi:latest
+    build:
+      context: ./cms-simple
+      dockerfile: Dockerfile
     container_name: iis-cms
     ports:
-      - "1337:1337"
-    environment:
-      - DATABASE_CLIENT=postgres
-      - DATABASE_HOST=cms-db
-      - DATABASE_PORT=5432
-      - DATABASE_NAME=strapi
-      - DATABASE_USERNAME=strapi
-      - DATABASE_PASSWORD=strapi_password
-      - JWT_SECRET=your-super-secret-jwt-token-here
-      - API_TOKEN_SALT=your-api-token-salt-here
-      - ADMIN_JWT_SECRET=your-admin-jwt-secret-here
-      - NODE_ENV=production
-    depends_on:
-      cms-db:
-        condition: service_healthy
+      - "1337:3001"
     volumes:
-      - cms_data:/srv/app
+      - cms_data:/app/data
     networks:
       - iis-network
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:1337"]
+      test: ["CMD", "curl", "-f", "http://localhost:3001/api/articulos"]
       interval: 30s
       timeout: 10s
       retries: 3
-      start_period: 60s
-
-  # Base de datos para CMS
-  cms-db:
-    image: postgres:15
-    container_name: iis-cms-db
-    environment:
-      - POSTGRES_DB=strapi
-      - POSTGRES_USER=strapi
-      - POSTGRES_PASSWORD=strapi_password
-    volumes:
-      - cms_db:/var/lib/postgresql/data
-    networks:
-      - iis-network
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U strapi"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+      start_period: 10s
 
   # Redis para caché (opcional)
   redis:

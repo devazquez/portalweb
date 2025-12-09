@@ -144,12 +144,13 @@ export const fetchOmekaResourceById = async (id) => {
 
 export const fetchCMSContent = async (params = {}) => {
   try {
-    const response = await cmsClient.get('/content', { params })
+    const response = await cmsClient.get('/articulos', { params })
     const items = response.data.data || response.data
     const sanitizedData = (Array.isArray(items) ? items : []).map(item => ({
       id: item.id,
       title: item.title || '',
       body: item.body || '',
+      description: item.description || '',
       source: 'cms'
     }))
     return sanitizedData
@@ -169,12 +170,13 @@ export const fetchCMSContentById = async (id) => {
     if (!id || typeof id !== 'string') {
       throw new Error('ID de contenido inválido')
     }
-    const response = await cmsClient.get(`/content/${id}`)
+    const response = await cmsClient.get(`/articulos/${id}`)
     const item = response.data.data || response.data
     return {
       id: item.id,
       title: item.title || '',
       body: item.body || '',
+      description: item.description || '',
       source: 'cms'
     }
   } catch (error) {

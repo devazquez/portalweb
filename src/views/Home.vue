@@ -53,7 +53,13 @@
                 <span class="meta-tag" v-if="resource.source">{{ resource.source }}</span>
                 <span class="meta-date" v-if="resource.created">{{ formatDate(resource.created) }}</span>
               </div>
-              <router-link :to="`/resource/${resource.id}`" class="btn btn-outline">
+              <router-link 
+                :to="{
+                  path: `/resource/${resource.id}`,
+                  query: resource.source ? { source: resource.source } : {}
+                }" 
+                class="btn btn-outline"
+              >
                 Ver Detalles
               </router-link>
             </div>

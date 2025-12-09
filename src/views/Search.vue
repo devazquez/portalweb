@@ -109,7 +109,10 @@
                 <span v-if="result.created" class="meta-item">📅 {{ formatDate(result.created) }}</span>
               </div>
               <router-link 
-                :to="`/resource/${result.id}`" 
+                :to="{
+                  path: `/resource/${result.id}`,
+                  query: result.source ? { source: result.source } : {}
+                }" 
                 class="result-link"
               >
                 Ver recurso completo →
