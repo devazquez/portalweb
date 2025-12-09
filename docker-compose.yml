@@ -8,8 +8,8 @@ services:
     ports:
       - "3000:3000"
     environment:
-      - VITE_OMEKA_API_URL=http://omeka:8080/api
-      - VITE_CMS_API_URL=http://cms:3000/api
+      - VITE_OMEKA_API_URL=http://omeka:80/api
+      - VITE_CMS_API_URL=http://cms:1337/api
       - NODE_ENV=production
     depends_on:
       - omeka
@@ -38,7 +38,7 @@ services:
       - MYSQL_HOST=db
       - MYSQL_DATABASE=omeka
       - MYSQL_USER=omeka
-      - MYSQL_PASSWORD=omeka_password
+      - MYSQL_PASSWORD=omeka
       - MYSQL_ROOT_PASSWORD=root_password
     depends_on:
       db:

@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>API Test</title>
+</head>
+<body>
+  <h1>Test de Conectividad de API</h1>
+  <button onclick="testOmekaAPI()">Test Omeka API</button>
+  <button onclick="testCMSAPI()">Test CMS API</button>
+  <pre id="result"></pre>
+  
+  <script>
+    async function testOmekaAPI() {
+      try {
+        const response = await fetch('http://localhost:8081/api/items', {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
+        const data = await response.json();
+        document.getElementById('result').textContent = 'Omeka API Response:\n' + JSON.stringify(data, null, 2);
+      } catch (error) {
+        document.getElementById('result').textContent = 'Error en Omeka API:\n' + error.toString();
+      }
+    }
+    
+    async function testCMSAPI() {
+      try {
+        const response = await fetch('http://localhost:1337/api', {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
+        const data = await response.json();
+        document.getElementById('result').textContent = 'CMS API Response:\n' + JSON.stringify(data, null, 2);
+      } catch (error) {
+        document.getElementById('result').textContent = 'Error en CMS API:\n' + error.toString();
+      }
+    }
+  </script>
+</body>
+</html>

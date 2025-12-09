@@ -7,6 +7,7 @@ WORKDIR /app
 COPY package*.json ./
 COPY vite.config.js ./
 COPY index.html ./
+COPY .env.local ./
 
 # Instalar dependencias
 RUN npm ci
