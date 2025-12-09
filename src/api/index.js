@@ -44,7 +44,10 @@ omekaClient.interceptors.response.use(
 cmsClient.interceptors.response.use(
   response => response,
   error => {
-    console.error('CMS API error:', error)
+    // No mostrar errores 404 ya que es normal si CMS no está configurado
+    if (error.response?.status !== 404) {
+      console.error('CMS API error:', error)
+    }
     return Promise.reject({
       message: 'Error al conectar con el CMS',
       status: error.response?.status || 'unknown'
@@ -151,7 +154,12 @@ export const fetchCMSContent = async (params = {}) => {
     }))
     return sanitizedData
   } catch (error) {
-    console.warn('CMS API no disponible:', error.message)
+    // Silencioso si CMS no está disponible o no está configurado (404)
+    if (error.status === 404) {
+      console.debug('CMS no configurado o sin contenido disponible')
+    } else {
+      console.warn('CMS API no disponible:', error.message)
+    }
     return []
   }
 }
@@ -225,7 +233,10 @@ export const searchResources = async (query, source = 'all') => {
           source: 'cms'
         })))
       } catch (err) {
-        console.error('CMS search error:', err)
+        // Silencioso si CMS no está disponible (404 es normal si no está configurado)
+        if (err.status !== 404) {
+          console.debug('CMS search no disponible')
+        }
       }
     }
 
