@@ -49,6 +49,14 @@ dist-ssr
 # OS
 Thumbs.db
 
+# Documentos Word (archivos locales)
+*.docx
+*.doc
+
+# Scripts de generación de documentos
+crear_documentos_word.py
+*_v2.docx
+
 EMPIEZA_AQUI.txt
 
 # Documentación (excepto README.md)
