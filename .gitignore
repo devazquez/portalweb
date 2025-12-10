@@ -59,6 +59,9 @@ crear_documentos_word.py
 
 EMPIEZA_AQUI.txt
 
+# Carpeta docs - documentación local no versionada
+docs/
+
 # Documentación (excepto README.md)
 *.md
 !README.md
