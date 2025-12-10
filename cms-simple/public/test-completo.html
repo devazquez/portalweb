@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Validación Funcionalidad CMS</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 10px;
+        }
+        
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+        
+        .tests {
+            display: grid;
+            gap: 20px;
+        }
+        
+        .test {
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            background: #f9f9f9;
+        }
+        
+        .test.running {
+            border-color: #ffc107;
+            background: #fff8e1;
+        }
+        
+        .test.success {
+            border-color: #28a745;
+            background: #e8f5e9;
+        }
+        
+        .test.error {
+            border-color: #dc3545;
+            background: #ffebee;
+        }
+        
+        .test-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .test-status {
+            display: inline-block;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 18px;
+        }
+        
+        .test.running .test-status {
+            background: #ffc107;
+        }
+        
+        .test.success .test-status {
+            background: #28a745;
+        }
+        
+        .test.error .test-status {
+            background: #dc3545;
+        }
+        
+        .test-description {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 15px;
+        }
+        
+        .test-result {
+            background: white;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        
+        .test-result.error {
+            color: #dc3545;
+            border-left: 4px solid #dc3545;
+        }
+        
+        .test-result.success {
+            color: #28a745;
+            border-left: 4px solid #28a745;
+        }
+        
+        .test-result.info {
+            color: #0c5460;
+            border-left: 4px solid #17a2b8;
+        }
+        
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.3s;
+        }
+        
+        button:hover {
+            background: #5568d3;
+        }
+        
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        
+        .controls {
+            margin-bottom: 30px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 30px;
+            padding-top: 30px;
+            border-top: 2px solid #ddd;
+        }
+        
+        .stat {
+            text-align: center;
+            padding: 15px;
+            background: #f5f5f5;
+            border-radius: 8px;
+        }
+        
+        .stat-number {
+            font-size: 32px;
+            font-weight: bold;
+            color: #667eea;
+        }
+        
+        .stat-label {
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
+        }
+        
+        .success-icon { color: #28a745; }
+        .error-icon { color: #dc3545; }
+        .running-icon { color: #ffc107; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 Validación de Funcionalidad - CMS Simple</h1>
+        <p class="subtitle">
+            Este panel prueba todos los endpoints del CMS para verificar que funciona correctamente.
+            <br>
+            <strong>⚠️ Importante:</strong> Asegúrate de que el servidor está corriendo en <code>http://localhost:3001</code>
+        </p>
+        
+        <div class="controls">
+            <button onclick="ejecutarTodos()">▶️ Ejecutar Todas las Pruebas</button>
+            <button onclick="limpiarResultados()">🔄 Limpiar Resultados</button>
+            <button onclick="recargar()">🔃 Recargar Página</button>
+        </div>
+        
+        <div class="tests">
+            <!-- Test 1: Conectar a servidor -->
+            <div class="test" id="test-conectar">
+                <div class="test-title">
+                    <span class="test-status">⏳</span>
+                    <span>1. Conectar al Servidor</span>
+                </div>
+                <p class="test-description">Verifica que el servidor está corriendo en puerto 3001</p>
+                <button onclick="testConectar()">Probar Conexión</button>
+                <div class="test-result info" id="test-conectar-result" style="display:none;"></div>
+            </div>
+            
+            <!-- Test 2: Obtener artículos -->
+            <div class="test" id="test-obtener">
+                <div class="test-title">
+                    <span class="test-status">⏳</span>
+                    <span>2. Obtener Artículos (GET /api/articulos)</span>
+                </div>
+                <p class="test-description">Recupera la lista de artículos desde el servidor</p>
+                <button onclick="testObtenerArticulos()">Obtener Artículos</button>
+                <div class="test-result info" id="test-obtener-result" style="display:none;"></div>
+            </div>
+            
+            <!-- Test 3: Crear artículo -->
+            <div class="test" id="test-crear">
+                <div class="test-title">
+                    <span class="test-status">⏳</span>
+                    <span>3. Crear Nuevo Artículo (POST /api/articulos)</span>
+                </div>
+                <p class="test-description">Crea un artículo de prueba para validar la funcionalidad</p>
+                <button onclick="testCrearArticulo()">Crear Artículo</button>
+                <div class="test-result info" id="test-crear-result" style="display:none;"></div>
+            </div>
+            
+            <!-- Test 4: Editar artículo -->
+            <div class="test" id="test-editar">
+                <div class="test-title">
+                    <span class="test-status">⏳</span>
+                    <span>4. Editar Artículo (PUT /api/articulos/:id)</span>
+                </div>
+                <p class="test-description">Modifica un artículo existente</p>
+                <button onclick="testEditarArticulo()">Editar Artículo</button>
+                <div class="test-result info" id="test-editar-result" style="display:none;"></div>
+            </div>
+            
+            <!-- Test 5: Buscar artículos -->
+            <div class="test" id="test-buscar">
+                <div class="test-title">
+                    <span class="test-status">⏳</span>
+                    <span>5. Buscar Artículos (GET /api/search?query=...)</span>
+                </div>
+                <p class="test-description">Busca artículos por término</p>
+                <button onclick="testBuscarArticulos()">Buscar Artículos</button>
+                <div class="test-result info" id="test-buscar-result" style="display:none;"></div>
+            </div>
+            
+            <!-- Test 6: Obtener artículo específico -->
+            <div class="test" id="test-obtener-uno">
+                <div class="test-title">
+                    <span class="test-status">⏳</span>
+                    <span>6. Obtener Artículo Específico (GET /api/articulos/:id)</span>
+                </div>
+                <p class="test-description">Recupera un artículo por su ID</p>
+                <button onclick="testObtenerUno()">Obtener Uno</button>
+                <div class="test-result info" id="test-obtener-uno-result" style="display:none;"></div>
+            </div>
+            
+            <!-- Test 7: Eliminar artículo -->
+            <div class="test" id="test-eliminar">
+                <div class="test-title">
+                    <span class="test-status">⏳</span>
+                    <span>7. Eliminar Artículo (DELETE /api/articulos/:id)</span>
+                </div>
+                <p class="test-description">Elimina el artículo de prueba creado</p>
+                <button onclick="testEliminarArticulo()">Eliminar Artículo</button>
+                <div class="test-result info" id="test-eliminar-result" style="display:none;"></div>
+            </div>
+        </div>
+        
+        <div class="stats">
+            <div class="stat">
+                <div class="stat-number" id="stat-total">0</div>
+                <div class="stat-label">Pruebas Totales</div>
+            </div>
+            <div class="stat">
+                <div class="stat-number" id="stat-exitosas" style="color: #28a745;">0</div>
+                <div class="stat-label">Exitosas</div>
+            </div>
+            <div class="stat">
+                <div class="stat-number" id="stat-fallidas" style="color: #dc3545;">0</div>
+                <div class="stat-label">Fallidas</div>
+            </div>
+            <div class="stat">
+                <div class="stat-number" id="stat-pendientes" style="color: #ffc107;">7</div>
+                <div class="stat-label">Pendientes</div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        const API_BASE = 'http://localhost:3001/api';
+        let articuloCreado = null;
+        let resultados = {
+            exitosas: 0,
+            fallidas: 0,
+            pendientes: 7
+        };
+        
+        function mostrarResultado(testId, resultado) {
+            const resultElement = document.getElementById(`${testId}-result`);
+            const testElement = document.getElementById(testId);
+            resultElement.style.display = 'block';
+            
+            if (resultado.success) {
+                resultElement.className = 'test-result success';
+                resultElement.innerHTML = `✅ ${resultado.mensaje}<br><br><pre>${JSON.stringify(resultado.data, null, 2).substring(0, 500)}...</pre>`;
+                testElement.classList.remove('running', 'error');
+                testElement.classList.add('success');
+                testElement.querySelector('.test-status').textContent = '✓';
+                resultados.exitosas++;
+                resultados.pendientes--;
+            } else {
+                resultElement.className = 'test-result error';
+                resultElement.innerHTML = `❌ ${resultado.error}`;
+                testElement.classList.remove('running', 'success');
+                testElement.classList.add('error');
+                testElement.querySelector('.test-status').textContent = '✗';
+                resultados.fallidas++;
+                resultados.pendientes--;
+            }
+            
+            actualizarStats();
+        }
+        
+        function actualizarStats() {
+            document.getElementById('stat-exitosas').textContent = resultados.exitosas;
+            document.getElementById('stat-fallidas').textContent = resultados.fallidas;
+            document.getElementById('stat-pendientes').textContent = resultados.pendientes;
+            document.getElementById('stat-total').textContent = 7 - resultados.pendientes;
+        }
+        
+        async function testConectar() {
+            const testId = 'test-conectar';
+            document.getElementById(testId).classList.add('running');
+            
+            try {
+                const response = await fetch(`${API_BASE}/articulos`);
+                if (response.ok) {
+                    mostrarResultado(testId, {
+                        success: true,
+                        mensaje: 'Servidor conectado correctamente en puerto 3001',
+                        data: { status: 'OK', url: API_BASE }
+                    });
+                } else {
+                    mostrarResultado(testId, {
+                        success: false,
+                        error: `Error HTTP ${response.status}: ${response.statusText}`
+                    });
+                }
+            } catch (error) {
+                mostrarResultado(testId, {
+                    success: false,
+                    error: `Error de conexión: ${error.message}. ¿El servidor está corriendo en localhost:3001?`
+                });
+            }
+        }
+        
+        async function testObtenerArticulos() {
+            const testId = 'test-obtener';
+            document.getElementById(testId).classList.add('running');
+            
+            try {
+                const response = await fetch(`${API_BASE}/articulos`);
+                const data = await response.json();
+                
+                if (response.ok && data.data) {
+                    mostrarResultado(testId, {
+                        success: true,
+                        mensaje: `Obtenidos ${data.data.length} artículos`,
+                        data
+                    });
+                } else {
+                    mostrarResultado(testId, {
+                        success: false,
+                        error: 'No se pudieron obtener los artículos'
+                    });
+                }
+            } catch (error) {
+                mostrarResultado(testId, {
+                    success: false,
+                    error: error.message
+                });
+            }
+        }
+        
+        async function testCrearArticulo() {
+            const testId = 'test-crear';
+            document.getElementById(testId).classList.add('running');
+            
+            const nuevoArticulo = {
+                titulo: `Test Artículo ${new Date().getTime()}`,
+                descripcion: "Artículo de prueba para validar funcionalidad",
+                cuerpo: "Este es un artículo creado para probar la funcionalidad del CMS. Contiene contenido de prueba.",
+                autor: "Test Automatizado"
+            };
+            
+            try {
+                const response = await fetch(`${API_BASE}/articulos`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(nuevoArticulo)
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok && data.data) {
+                    articuloCreado = data.data;
+                    mostrarResultado(testId, {
+                        success: true,
+                        mensaje: `Artículo creado con ID ${data.data.id}`,
+                        data
+                    });
+                } else {
+                    mostrarResultado(testId, {
+                        success: false,
+                        error: 'Error al crear artículo'
+                    });
+                }
+            } catch (error) {
+                mostrarResultado(testId, {
+                    success: false,
+                    error: error.message
+                });
+            }
+        }
+        
+        async function testEditarArticulo() {
+            const testId = 'test-editar';
+            document.getElementById(testId).classList.add('running');
+            
+            if (!articuloCreado) {
+                mostrarResultado(testId, {
+                    success: false,
+                    error: 'Primero debes crear un artículo (ejecuta prueba 3)'
+                });
+                return;
+            }
+            
+            const datosActualizados = {
+                titulo: articuloCreado.titulo + " (Editado)",
+                descripcion: "Descripción actualizada",
+                cuerpo: articuloCreado.cuerpo + " - Modificado en prueba",
+                autor: "Test Editado"
+            };
+            
+            try {
+                const response = await fetch(`${API_BASE}/articulos/${articuloCreado.id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(datosActualizados)
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok && data.data) {
+                    mostrarResultado(testId, {
+                        success: true,
+                        mensaje: `Artículo ${articuloCreado.id} actualizado`,
+                        data
+                    });
+                } else {
+                    mostrarResultado(testId, {
+                        success: false,
+                        error: 'Error al actualizar artículo'
+                    });
+                }
+            } catch (error) {
+                mostrarResultado(testId, {
+                    success: false,
+                    error: error.message
+                });
+            }
+        }
+        
+        async function testBuscarArticulos() {
+            const testId = 'test-buscar';
+            document.getElementById(testId).classList.add('running');
+            
+            try {
+                const response = await fetch(`${API_BASE}/search?query=inteligencia`);
+                const data = await response.json();
+                
+                if (response.ok) {
+                    mostrarResultado(testId, {
+                        success: true,
+                        mensaje: `Búsqueda realizada, ${data.data?.length || 0} resultados`,
+                        data
+                    });
+                } else {
+                    mostrarResultado(testId, {
+                        success: false,
+                        error: 'Error en búsqueda'
+                    });
+                }
+            } catch (error) {
+                mostrarResultado(testId, {
+                    success: false,
+                    error: error.message
+                });
+            }
+        }
+        
+        async function testObtenerUno() {
+            const testId = 'test-obtener-uno';
+            document.getElementById(testId).classList.add('running');
+            
+            try {
+                const response = await fetch(`${API_BASE}/articulos/1`);
+                const data = await response.json();
+                
+                if (response.ok && data.data) {
+                    mostrarResultado(testId, {
+                        success: true,
+                        mensaje: `Artículo obtenido: ${data.data.titulo || data.data.title}`,
+                        data
+                    });
+                } else {
+                    mostrarResultado(testId, {
+                        success: false,
+                        error: 'Artículo no encontrado'
+                    });
+                }
+            } catch (error) {
+                mostrarResultado(testId, {
+                    success: false,
+                    error: error.message
+                });
+            }
+        }
+        
+        async function testEliminarArticulo() {
+            const testId = 'test-eliminar';
+            document.getElementById(testId).classList.add('running');
+            
+            if (!articuloCreado) {
+                mostrarResultado(testId, {
+                    success: false,
+                    error: 'No hay artículo para eliminar (debes crear uno primero)'
+                });
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE}/articulos/${articuloCreado.id}`, {
+                    method: 'DELETE'
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    mostrarResultado(testId, {
+                        success: true,
+                        mensaje: `Artículo ${articuloCreado.id} eliminado`,
+                        data
+                    });
+                    articuloCreado = null;
+                } else {
+                    mostrarResultado(testId, {
+                        success: false,
+                        error: 'Error al eliminar artículo'
+                    });
+                }
+            } catch (error) {
+                mostrarResultado(testId, {
+                    success: false,
+                    error: error.message
+                });
+            }
+        }
+        
+        async function ejecutarTodos() {
+            limpiarResultados();
+            await testConectar();
+            setTimeout(() => testObtenerArticulos(), 500);
+            setTimeout(() => testCrearArticulo(), 1000);
+            setTimeout(() => testEditarArticulo(), 1500);
+            setTimeout(() => testBuscarArticulos(), 2000);
+            setTimeout(() => testObtenerUno(), 2500);
+            setTimeout(() => testEliminarArticulo(), 3000);
+        }
+        
+        function limpiarResultados() {
+            document.querySelectorAll('.test').forEach(t => {
+                t.classList.remove('success', 'error', 'running');
+                t.classList.add('running');
+                t.querySelector('.test-status').textContent = '⏳';
+            });
+            document.querySelectorAll('.test-result').forEach(r => {
+                r.style.display = 'none';
+            });
+            
+            resultados = { exitosas: 0, fallidas: 0, pendientes: 7 };
+            actualizarStats();
+        }
+        
+        function recargar() {
+            location.reload();
+        }
+    </script>
+</body>
+</html>

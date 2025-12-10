@@ -6,7 +6,9 @@
 // VARIABLES GLOBALES
 // ============================================================================
 
-const API_BASE = 'http://localhost:1337/api';
+// API_BASE - Usar el puerto correcto del servidor CMS
+// IMPORTANTE: Si cambias el puerto del servidor, actualiza aquí
+const API_BASE = 'http://localhost:3001/api';
 let articulos = [];
 let articulosFiltrados = [];
 let paginaActual = 1;
@@ -47,14 +49,38 @@ function inicializarEventos() {
         });
     });
 
+    // Botón "Nuevo Artículo" en el header
+    const newArticleBtn = document.getElementById('newArticleBtn');
+    if (newArticleBtn) {
+        newArticleBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            mostrarSeccion('crear');
+            const createForm = document.getElementById('articleForm');
+            if (createForm) {
+                createForm.reset();
+            }
+            const charCount = document.getElementById('charCount');
+            if (charCount) {
+                charCount.textContent = '0';
+            }
+            console.log('✅ Formulario de crear artículo abierto');
+        });
+    }
+
     // Modal
     closeBtn?.addEventListener('click', cerrarModal);
     modal?.addEventListener('click', (e) => {
         if (e.target === modal) cerrarModal();
     });
 
+    // Botón Cancelar en modal
+    const cancelBtn = document.getElementById('cancelBtn');
+    if (cancelBtn) {
+        cancelBtn.addEventListener('click', cerrarModal);
+    }
+
     // Formulario de crear artículo
-    const createForm = document.getElementById('createForm');
+    const createForm = document.getElementById('articleForm');
     if (createForm) {
         createForm.addEventListener('submit', (e) => {
             e.preventDefault();
@@ -79,14 +105,22 @@ function inicializarEventos() {
     }
 
     // Contador de caracteres
-    const bodyInput = document.getElementById('articleBody');
+    const bodyInput = document.getElementById('body');
     if (bodyInput) {
-        bodyInput.addEventListener('input', actualizarContador);
+        bodyInput.addEventListener('input', (e) => {
+            const charCount = document.getElementById('charCount');
+            if (charCount) {
+                charCount.textContent = e.target.value.length;
+            }
+        });
     }
 
-    const editBodyInput = document.getElementById('editArticleBody');
+    const editBodyInput = document.getElementById('editBody');
     if (editBodyInput) {
-        editBodyInput.addEventListener('input', actualizarContadorEdicion);
+        editBodyInput.addEventListener('input', (e) => {
+            // Actualizar contador en el modal si existe
+            console.log('Caracteres:', e.target.value.length);
+        });
     }
 
     // Botones de exportar y limpiar
@@ -110,10 +144,12 @@ function mostrarSeccion(nombreSeccion) {
         }
     });
 
-    // Actualizar secciones
+    // Actualizar secciones (convertir nombreSeccion a id con guiones)
     sections.forEach(section => {
         section.classList.remove('active');
-        if (section.id === nombreSeccion + 'Section') {
+        // Convertir 'crear' a 'crear-section', 'articulos' a 'articulos-section', etc.
+        const sectionId = nombreSeccion + '-section';
+        if (section.id === sectionId) {
             section.classList.add('active');
         }
     });
@@ -137,30 +173,53 @@ function mostrarSeccion(nombreSeccion) {
 
 async function cargarArticulos() {
     try {
+        console.log('📥 Cargando artículos desde:', API_BASE);
         const response = await fetch(`${API_BASE}/articulos`);
         if (!response.ok) throw new Error('Error al cargar artículos');
         
-        articulos = await response.json();
+        const result = await response.json();
+        console.log('✅ Respuesta recibida:', result);
+        
+        // La API devuelve {data: [...], meta: {...}}
+        articulos = Array.isArray(result) ? result : (result.data || []);
         articulosFiltrados = [...articulos];
+        
+        console.log('✅ Artículos cargados:', articulos.length);
+        console.log('   IDs disponibles:', articulos.map(a => `${a.id} (${typeof a.id})`).join(', '));
+        
         renderizarTabla();
         actualizarDashboard();
         mostrarNotificacion('Artículos cargados correctamente', 'info');
     } catch (error) {
-        console.error('Error:', error);
+        console.error('❌ Error:', error);
         mostrarNotificacion('Error al cargar los artículos', 'error');
     }
 }
 
 async function crearArticulo() {
-    const form = document.getElementById('createForm');
-    if (!validarFormulario(form)) return;
+    const form = document.getElementById('articleForm');
+    if (!form) {
+        console.error('❌ Formulario no encontrado');
+        return;
+    }
 
-    const formData = new FormData(form);
+    // Obtener valores del formulario
+    const titulo = document.getElementById('title')?.value;
+    const descripcion = document.getElementById('description')?.value;
+    const cuerpo = document.getElementById('body')?.value;
+    const autor = document.getElementById('author')?.value || 'Administrador';
+
+    // Validar campos requeridos
+    if (!titulo || !descripcion || !cuerpo) {
+        mostrarNotificacion('Por favor completa todos los campos requeridos', 'error');
+        return;
+    }
+
     const nuevoArticulo = {
-        titulo: formData.get('articleTitle'),
-        descripcion: formData.get('articleDescription'),
-        cuerpo: formData.get('articleBody'),
-        autor: formData.get('articleAuthor') || 'Administrador',
+        titulo,
+        descripcion,
+        cuerpo,
+        autor,
         fecha: new Date().toISOString()
     };
 
@@ -177,10 +236,11 @@ async function crearArticulo() {
 
         const resultado = await response.json();
         form.reset();
-        document.getElementById('charCount').textContent = '0/5000';
+        const charCount = document.getElementById('charCount');
+        if (charCount) charCount.textContent = '0';
         mostrarNotificacion('Artículo creado exitosamente', 'success');
         cargarArticulos();
-        mostrarSeccion('articles');
+        mostrarSeccion('articulos');
     } catch (error) {
         console.error('Error:', error);
         mostrarNotificacion('Error al crear el artículo', 'error');
@@ -206,34 +266,73 @@ async function eliminarArticulo(id) {
 }
 
 async function abrirEdicion(id) {
-    const articulo = articulos.find(a => a.id === id);
-    if (!articulo) return;
+    console.log('🔧 abrirEdicion() llamado con ID:', id, 'tipo:', typeof id);
+    
+    // Convertir a número si es string para comparación correcta
+    const idNumero = parseInt(id, 10);
+    console.log('   ID convertido a número:', idNumero);
+    
+    const articulo = articulos.find(a => {
+        console.log('  Comparando: a.id=' + a.id + ' (' + typeof a.id + ') vs idNumero=' + idNumero);
+        return a.id === idNumero || a.id == id;
+    });
+    
+    console.log('📄 Artículo encontrado:', articulo);
+    
+    if (!articulo) {
+        console.error('❌ No se encontró artículo con ID:', id);
+        console.error('   Artículos disponibles:', articulos.map(a => a.id));
+        return;
+    }
 
     articuloEditando = articulo;
+    console.log('✅ articuloEditando asignado');
 
-    // Llenar formulario de edición
-    document.getElementById('editArticleTitle').value = articulo.titulo;
-    document.getElementById('editArticleDescription').value = articulo.descripcion;
-    document.getElementById('editArticleBody').value = articulo.cuerpo;
-    document.getElementById('editArticleAuthor').value = articulo.autor;
+    // Llenar formulario de edición con los IDs correctos del modal
+    try {
+        document.getElementById('editId').value = articulo.id || '';
+        document.getElementById('editTitle').value = articulo.titulo || articulo.title || '';
+        document.getElementById('editDescription').value = articulo.descripcion || articulo.description || '';
+        document.getElementById('editBody').value = articulo.cuerpo || articulo.body || '';
+        document.getElementById('editAuthor').value = articulo.autor || articulo.author || '';
+        console.log('✅ Campos del formulario llenados');
+    } catch (error) {
+        console.error('❌ Error al llenar formulario:', error);
+    }
 
-    document.getElementById('editCharCount').textContent = `${articulo.cuerpo.length}/5000`;
-    
+    console.log('🎭 Llamando a abrirModal()');
     abrirModal();
+    console.log('✅ Modal debería estar abierto');
 }
 
 async function guardarEdicion() {
     const form = document.getElementById('editForm');
-    if (!validarFormulario(form)) return;
+    if (!form) {
+        console.error('❌ Formulario de edición no encontrado');
+        return;
+    }
 
-    if (!articuloEditando) return;
+    if (!articuloEditando) {
+        mostrarNotificacion('No hay artículo seleccionado', 'error');
+        return;
+    }
 
-    const formData = new FormData(form);
+    // Obtener valores del formulario con los IDs correctos del modal
+    const titulo = document.getElementById('editTitle')?.value;
+    const descripcion = document.getElementById('editDescription')?.value;
+    const cuerpo = document.getElementById('editBody')?.value;
+    const autor = document.getElementById('editAuthor')?.value;
+
+    if (!titulo || !descripcion || !cuerpo) {
+        mostrarNotificacion('Por favor completa todos los campos requeridos', 'error');
+        return;
+    }
+
     const datosActualizados = {
-        titulo: formData.get('editArticleTitle'),
-        descripcion: formData.get('editArticleDescription'),
-        cuerpo: formData.get('editArticleBody'),
-        autor: formData.get('editArticleAuthor'),
+        titulo,
+        descripcion,
+        cuerpo,
+        autor: autor || 'Administrador',
         fecha: articuloEditando.fecha
     };
 
@@ -310,16 +409,19 @@ function renderizarTabla() {
     // Renderizar filas
     articulosPagina.forEach(articulo => {
         const fila = document.createElement('tr');
-        const fechaFormato = new Date(articulo.fecha).toLocaleDateString('es-ES');
-        const titulo = articulo.titulo.length > 50 
-            ? articulo.titulo.substring(0, 50) + '...' 
-            : articulo.titulo;
+        
+        // Validar que el artículo tenga las propiedades necesarias
+        const titulo = (articulo.titulo || 'Sin título').substring(0, 50);
+        const autor = articulo.autor || 'Sin autor';
+        const fecha = articulo.fecha ? new Date(articulo.fecha).toLocaleDateString('es-ES') : 'Sin fecha';
+        const cuerpo = articulo.cuerpo || '';
+        const tamano = cuerpo.length;
 
         fila.innerHTML = `
             <td>${titulo}</td>
-            <td>${articulo.autor}</td>
-            <td>${fechaFormato}</td>
-            <td>${articulo.cuerpo.length} caracteres</td>
+            <td>${autor}</td>
+            <td>${fecha}</td>
+            <td>${tamano} caracteres</td>
             <td>
                 <div class="table-actions">
                     <button class="btn btn-sm btn-warning" onclick="abrirEdicion('${articulo.id}')">
@@ -386,16 +488,30 @@ function renderizarPaginacion(totalPaginas) {
 // ============================================================================
 
 function abrirModal() {
+    console.log('🎭 abrirModal() llamado');
+    console.log('   modal elemento:', modal);
+    console.log('   modal.classList antes:', modal?.className);
+    
     if (modal) {
         modal.classList.remove('hidden');
+        console.log('✅ Clase "hidden" removida');
+        console.log('   modal.classList después:', modal.className);
+    } else {
+        console.error('❌ modal es null/undefined');
     }
 }
 
 function cerrarModal() {
+    console.log('🎭 cerrarModal() llamado');
+    
     if (modal) {
         modal.classList.add('hidden');
+        console.log('✅ Clase "hidden" añadida');
         articuloEditando = null;
-        document.getElementById('editForm').reset();
+        const form = document.getElementById('editForm');
+        if (form) form.reset();
+    } else {
+        console.error('❌ modal es null/undefined');
     }
 }
 
@@ -466,7 +582,8 @@ function actualizarDashboard() {
 
     // Conteo total de palabras
     const totalPalabras = articulos.reduce((total, a) => {
-        const palabras = a.cuerpo.split(/\s+/).filter(p => p.length > 0).length;
+        const cuerpo = a.cuerpo || '';
+        const palabras = cuerpo.split(/\s+/).filter(p => p.length > 0).length;
         return total + palabras;
     }, 0);
 
@@ -474,9 +591,9 @@ function actualizarDashboard() {
     let ultimaActualizacion = 'Nunca';
     if (articulos.length > 0) {
         const articulos_ordenados = [...articulos].sort((a, b) => 
-            new Date(b.fecha) - new Date(a.fecha)
+            new Date(b.fecha || 0) - new Date(a.fecha || 0)
         );
-        const fechaUltima = new Date(articulos_ordenados[0].fecha);
+        const fechaUltima = new Date(articulos_ordenados[0].fecha || Date.now());
         ultimaActualizacion = fechaUltima.toLocaleDateString('es-ES') + ' ' +
                             fechaUltima.toLocaleTimeString('es-ES');
     }
@@ -495,23 +612,22 @@ function actualizarDashboard() {
     if (recentArticles) {
         recentArticles.innerHTML = '';
         const articulosRecientes = [...articulos]
-            .sort((a, b) => new Date(b.fecha) - new Date(a.fecha))
+            .sort((a, b) => new Date(b.fecha || 0) - new Date(a.fecha || 0))
             .slice(0, 5);
 
         if (articulosRecientes.length === 0) {
             recentArticles.innerHTML = '<div class="empty-state">No hay artículos recientes</div>';
         } else {
             articulosRecientes.forEach(articulo => {
-                const fecha = new Date(articulo.fecha).toLocaleDateString('es-ES');
-                const titulo = articulo.titulo.length > 60 
-                    ? articulo.titulo.substring(0, 60) + '...' 
-                    : articulo.titulo;
+                const fecha = (articulo.fecha ? new Date(articulo.fecha).toLocaleDateString('es-ES') : 'Sin fecha');
+                const titulo = (articulo.titulo || 'Sin título').substring(0, 60);
+                const autor = articulo.autor || 'Sin autor';
                 
                 const item = document.createElement('div');
                 item.className = 'article-item';
                 item.innerHTML = `
                     <div class="article-item-title">${titulo}</div>
-                    <div class="article-item-meta">Por ${articulo.autor} - ${fecha}</div>
+                    <div class="article-item-meta">Por ${autor} - ${fecha}</div>
                 `;
                 recentArticles.appendChild(item);
             });

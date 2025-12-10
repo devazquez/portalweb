@@ -11,13 +11,18 @@ export const useResourceStore = defineStore('resources', () => {
   const selectedFilters = ref({})
 
   const filteredResources = computed(() => {
-    let results = omekaResources.value
+    // Combinar recursos de Omeka y CMS
+    let results = [
+      ...omekaResources.value,
+      ...cmsContent.value
+    ]
 
     if (searchQuery.value) {
       const query = searchQuery.value.toLowerCase()
       results = results.filter(r => 
         r.title?.toLowerCase().includes(query) ||
-        r.description?.toLowerCase().includes(query)
+        r.description?.toLowerCase().includes(query) ||
+        r.body?.toLowerCase().includes(query)
       )
     }
 

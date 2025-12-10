@@ -79,6 +79,11 @@ app.get('/api/search', async (req, res) => {
     
     const searchTerm = query.toLowerCase();
     const results = data.articulos?.filter(a => 
+      // Buscar en campos españoles
+      a.titulo?.toLowerCase().includes(searchTerm) ||
+      a.descripcion?.toLowerCase().includes(searchTerm) ||
+      a.cuerpo?.toLowerCase().includes(searchTerm) ||
+      // Y también en campos ingleses por compatibilidad
       a.title?.toLowerCase().includes(searchTerm) ||
       a.body?.toLowerCase().includes(searchTerm) ||
       a.description?.toLowerCase().includes(searchTerm)
@@ -96,37 +101,55 @@ app.get('/api/search', async (req, res) => {
 // POST /api/articulos - Crear artículo
 app.post('/api/articulos', async (req, res) => {
   try {
-    const { title, description, body } = req.body;
+    // Aceptar ambos formatos (inglés y español)
+    const titulo = req.body.titulo || req.body.title;
+    const descripcion = req.body.descripcion || req.body.description;
+    const cuerpo = req.body.cuerpo || req.body.body;
+    const autor = req.body.autor || req.body.author || 'Administrador';
+    const fecha = req.body.fecha || new Date().toISOString();
+    
     const data = await readData();
     
-    if (!title) {
+    if (!titulo) {
       return res.status(400).json({ error: 'Título requerido' });
     }
     
     const id = Math.max(0, ...data.articulos?.map(a => a.id) || [0]) + 1;
     const articulo = {
       id,
-      title,
-      description: description || '',
-      body: body || '',
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
+      titulo: titulo || '',
+      descripcion: descripcion || '',
+      cuerpo: cuerpo || '',
+      autor: autor || 'Administrador',
+      fecha: fecha,
+      // También mantener en inglés para compatibilidad
+      title: titulo,
+      description: descripcion,
+      body: cuerpo
     };
     
     if (!data.articulos) data.articulos = [];
     data.articulos.push(articulo);
     await writeData(data);
     
+    console.log('✅ Artículo creado:', articulo.id);
     res.status(201).json({ data: articulo });
   } catch (error) {
-    res.status(500).json({ error: 'Error al crear artículo' });
+    console.error('❌ Error al crear artículo:', error);
+    res.status(500).json({ error: 'Error al crear artículo', details: error.message });
   }
 });
 
 // PUT /api/articulos/:id - Actualizar artículo
 app.put('/api/articulos/:id', async (req, res) => {
   try {
-    const { title, description, body } = req.body;
+    // Aceptar ambos formatos (inglés y español)
+    const titulo = req.body.titulo || req.body.title;
+    const descripcion = req.body.descripcion || req.body.description;
+    const cuerpo = req.body.cuerpo || req.body.body;
+    const autor = req.body.autor || req.body.author;
+    const fecha = req.body.fecha;
+    
     const data = await readData();
     const index = data.articulos?.findIndex(a => a.id === parseInt(req.params.id));
     
@@ -134,18 +157,27 @@ app.put('/api/articulos/:id', async (req, res) => {
       return res.status(404).json({ error: 'Artículo no encontrado' });
     }
     
+    // Actualizar con valores nuevos o mantener los existentes
     data.articulos[index] = {
       ...data.articulos[index],
-      title: title || data.articulos[index].title,
-      description: description !== undefined ? description : data.articulos[index].description,
-      body: body !== undefined ? body : data.articulos[index].body,
+      titulo: titulo || data.articulos[index].titulo,
+      descripcion: descripcion !== undefined ? descripcion : data.articulos[index].descripcion,
+      cuerpo: cuerpo !== undefined ? cuerpo : data.articulos[index].cuerpo,
+      autor: autor || data.articulos[index].autor,
+      fecha: fecha || data.articulos[index].fecha,
+      // También mantener en inglés para compatibilidad
+      title: titulo || data.articulos[index].title,
+      description: descripcion || data.articulos[index].description,
+      body: cuerpo || data.articulos[index].body,
       updatedAt: new Date().toISOString()
     };
     
     await writeData(data);
+    console.log('✅ Artículo actualizado:', data.articulos[index].id);
     res.json({ data: data.articulos[index] });
   } catch (error) {
-    res.status(500).json({ error: 'Error al actualizar artículo' });
+    console.error('❌ Error al actualizar artículo:', error);
+    res.status(500).json({ error: 'Error al actualizar artículo', details: error.message });
   }
 });
 
@@ -162,9 +194,11 @@ app.delete('/api/articulos/:id', async (req, res) => {
     const deleted = data.articulos.splice(index, 1);
     await writeData(data);
     
+    console.log('✅ Artículo eliminado:', deleted[0].id);
     res.json({ data: deleted[0] });
   } catch (error) {
-    res.status(500).json({ error: 'Error al eliminar artículo' });
+    console.error('❌ Error al eliminar artículo:', error);
+    res.status(500).json({ error: 'Error al eliminar artículo', details: error.message });
   }
 });
 

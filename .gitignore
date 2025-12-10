@@ -48,4 +48,8 @@ dist-ssr
 
 # OS
 Thumbs.db
+
+# Documentación (excepto README.md)
+*.md
+!README.md
 .DS_Store

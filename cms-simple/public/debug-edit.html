@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug - Edición de Artículos</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: Arial, sans-serif;
+            background: #f5f5f5;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 { color: #333; margin-bottom: 20px; }
+        .test-section {
+            margin-bottom: 30px;
+            padding: 15px;
+            background: #f9f9f9;
+            border-left: 4px solid #007bff;
+            border-radius: 4px;
+        }
+        .test-section h2 {
+            color: #007bff;
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px 5px 5px 0;
+            font-size: 14px;
+        }
+        button:hover { background: #0056b3; }
+        .log {
+            background: #1e1e1e;
+            color: #00ff00;
+            padding: 15px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+            margin-top: 10px;
+        }
+        .success { color: #4ec9b0; }
+        .error { color: #f48771; }
+        .warning { color: #dcdcaa; }
+        .info { color: #569cd6; }
+        .result-box {
+            background: #e8f4f8;
+            border: 2px solid #007bff;
+            padding: 15px;
+            border-radius: 4px;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 Debug - Sistema de Edición de Artículos</h1>
+
+        <div class="test-section">
+            <h2>1. Verificar Elementos del DOM</h2>
+            <button onclick="verificarDOM()">🔍 Verificar elementos en el CMS</button>
+            <div class="log" id="log-dom"></div>
+        </div>
+
+        <div class="test-section">
+            <h2>2. Simular Click en Editar</h2>
+            <button onclick="simularClickEditar()">🖱️ Simular click en botón Editar</button>
+            <div class="log" id="log-click"></div>
+        </div>
+
+        <div class="test-section">
+            <h2>3. Verificar Variables Globales</h2>
+            <button onclick="verificarVariables()">📊 Verificar variables globales</button>
+            <div class="log" id="log-variables"></div>
+        </div>
+
+        <div class="test-section">
+            <h2>4. Obtener Datos del API</h2>
+            <button onclick="obtenerDatos()">📥 Obtener artículos del API</button>
+            <div class="log" id="log-datos"></div>
+        </div>
+
+        <div class="test-section">
+            <h2>5. Ejecutar Función abrirEdicion Directamente</h2>
+            <input type="text" id="articulo-id" placeholder="ID del artículo (ej: 1)" value="1">
+            <button onclick="ejecutarAbrirEdicion()">⚡ Ejecutar abrirEdicion()</button>
+            <div class="log" id="log-ejecucion"></div>
+        </div>
+
+        <div class="test-section">
+            <h2>6. Verificar Estado del Modal</h2>
+            <button onclick="verificarModalEstado()">🎭 Verificar estado del modal</button>
+            <div class="log" id="log-modal"></div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:3001/api';
+        let articulosGlobales = [];
+
+        function log(mensaje, tipo = 'info') {
+            const color = {
+                'success': '#4ec9b0',
+                'error': '#f48771',
+                'warning': '#dcdcaa',
+                'info': '#569cd6'
+            }[tipo] || '#569cd6';
+
+            const elemento = document.createElement('div');
+            elemento.style.color = color;
+            elemento.textContent = `[${new Date().toLocaleTimeString()}] ${mensaje}`;
+            return elemento;
+        }
+
+        function verificarDOM() {
+            const logDiv = document.getElementById('log-dom');
+            logDiv.innerHTML = '';
+
+            const elementos = [
+                { id: 'editModal', nombre: 'Modal de edición' },
+                { id: 'editForm', nombre: 'Formulario de edición' },
+                { id: 'editTitle', nombre: 'Campo Título' },
+                { id: 'editDescription', nombre: 'Campo Descripción' },
+                { id: 'editBody', nombre: 'Campo Contenido' },
+                { id: 'editAuthor', nombre: 'Campo Autor' },
+                { id: 'editId', nombre: 'Campo ID (hidden)' },
+                { selector: '.close-btn', nombre: 'Botón Cerrar Modal' },
+                { id: 'cancelBtn', nombre: 'Botón Cancelar' },
+            ];
+
+            elementos.forEach(el => {
+                const elemento = el.id ? document.getElementById(el.id) : document.querySelector(el.selector);
+                const existe = !!elemento;
+                logDiv.appendChild(log(`${existe ? '✓' : '✗'} ${el.nombre}`, existe ? 'success' : 'error'));
+                
+                if (elemento && el.id === 'editModal') {
+                    const clases = elemento.className;
+                    const estaOculto = elemento.classList.contains('hidden');
+                    logDiv.appendChild(log(`  → Clases: "${clases}"`, 'info'));
+                    logDiv.appendChild(log(`  → Está oculto: ${estaOculto ? 'SÍ' : 'NO'}`, estaOculto ? 'warning' : 'success'));
+                }
+            });
+        }
+
+        async function simularClickEditar() {
+            const logDiv = document.getElementById('log-click');
+            logDiv.innerHTML = '';
+
+            try {
+                logDiv.appendChild(log('Obteniendo primer artículo...', 'info'));
+                const response = await fetch(`${API_BASE}/articulos`);
+                const data = await response.json();
+
+                if (!data.data || data.data.length === 0) {
+                    logDiv.appendChild(log('❌ No hay artículos para editar', 'error'));
+                    return;
+                }
+
+                const primerArticulo = data.data[0];
+                logDiv.appendChild(log(`Encontrado: "${primerArticulo.titulo}" (ID: ${primerArticulo.id})`, 'success'));
+
+                // Buscar botón Editar
+                const btnsEditar = document.querySelectorAll('button');
+                const btnEditar = Array.from(btnsEditar).find(btn => btn.textContent.includes('✏️'));
+
+                if (!btnEditar) {
+                    logDiv.appendChild(log('❌ No se encontró botón Editar en la página', 'error'));
+                    logDiv.appendChild(log('Intenta hacer click manualmente en "Artículos" → "Editar" en el CMS', 'warning'));
+                    return;
+                }
+
+                logDiv.appendChild(log('✓ Botón Editar encontrado', 'success'));
+                logDiv.appendChild(log('→ Simulando click...', 'info'));
+
+                // Simular click
+                btnEditar.click();
+
+                // Verificar resultado
+                setTimeout(() => {
+                    const modal = document.getElementById('editModal');
+                    if (modal && !modal.classList.contains('hidden')) {
+                        logDiv.appendChild(log('✓ Modal abierto exitosamente', 'success'));
+                    } else {
+                        logDiv.appendChild(log('❌ Modal NO se abrió', 'error'));
+                    }
+                }, 500);
+
+            } catch (error) {
+                logDiv.appendChild(log(`❌ Error: ${error.message}`, 'error'));
+            }
+        }
+
+        function verificarVariables() {
+            const logDiv = document.getElementById('log-variables');
+            logDiv.innerHTML = '';
+
+            // En una página de debug, no tenemos acceso a las variables globales del CMS
+            logDiv.appendChild(log('Las variables globales del CMS no son accesibles desde esta página de debug', 'info'));
+            logDiv.appendChild(log('Abre la consola de DevTools (F12) en el CMS y ejecuta:', 'warning'));
+            logDiv.appendChild(log('  console.log("articulos:", articulos)', 'info'));
+            logDiv.appendChild(log('  console.log("modal:", modal)', 'info'));
+            logDiv.appendChild(log('  console.log("articuloEditando:", articuloEditando)', 'info'));
+        }
+
+        async function obtenerDatos() {
+            const logDiv = document.getElementById('log-datos');
+            logDiv.innerHTML = '';
+
+            try {
+                logDiv.appendChild(log('Conectando al API...', 'info'));
+                const response = await fetch(`${API_BASE}/articulos`);
+
+                if (!response.ok) {
+                    logDiv.appendChild(log(`❌ Error HTTP: ${response.status}`, 'error'));
+                    return;
+                }
+
+                const data = await response.json();
+                logDiv.appendChild(log('✓ Conexión exitosa', 'success'));
+                logDiv.appendChild(log(`Total de artículos: ${data.data?.length || 0}`, 'info'));
+
+                if (data.data && data.data.length > 0) {
+                    articulosGlobales = data.data;
+                    data.data.forEach((art, i) => {
+                        logDiv.appendChild(log(`${i + 1}. ID: ${art.id}, Título: "${art.titulo || art.title}"`, 'info'));
+                    });
+                }
+            } catch (error) {
+                logDiv.appendChild(log(`❌ Error: ${error.message}`, 'error'));
+            }
+        }
+
+        async function ejecutarAbrirEdicion() {
+            const logDiv = document.getElementById('log-ejecucion');
+            logDiv.innerHTML = '';
+
+            const id = document.getElementById('articulo-id').value;
+            
+            if (!id) {
+                logDiv.appendChild(log('❌ Debes ingresar un ID', 'error'));
+                return;
+            }
+
+            try {
+                // Si no tenemos artículos, obtenerlos
+                if (articulosGlobales.length === 0) {
+                    logDiv.appendChild(log('Obteniendo artículos...', 'info'));
+                    const response = await fetch(`${API_BASE}/articulos`);
+                    const data = await response.json();
+                    articulosGlobales = data.data || [];
+                }
+
+                const articulo = articulosGlobales.find(a => a.id == id);
+                
+                if (!articulo) {
+                    logDiv.appendChild(log(`❌ Artículo con ID ${id} no encontrado`, 'error'));
+                    return;
+                }
+
+                logDiv.appendChild(log(`✓ Artículo encontrado: "${articulo.titulo}"`, 'success'));
+
+                // Rellenar los campos del modal (simulando abrirEdicion)
+                const camposEdicion = {
+                    'editId': articulo.id || '',
+                    'editTitle': articulo.titulo || articulo.title || '',
+                    'editDescription': articulo.descripcion || articulo.description || '',
+                    'editBody': articulo.cuerpo || articulo.body || '',
+                    'editAuthor': articulo.autor || articulo.author || ''
+                };
+
+                Object.entries(camposEdicion).forEach(([campo, valor]) => {
+                    const elemento = document.getElementById(campo);
+                    if (elemento) {
+                        elemento.value = valor;
+                        logDiv.appendChild(log(`✓ ${campo}: "${valor.substring(0, 30)}${valor.length > 30 ? '...' : ''}"`, 'info'));
+                    } else {
+                        logDiv.appendChild(log(`❌ Campo ${campo} no encontrado en el DOM`, 'error'));
+                    }
+                });
+
+                // Abrir modal
+                const modal = document.getElementById('editModal');
+                if (modal) {
+                    modal.classList.remove('hidden');
+                    logDiv.appendChild(log('✓ Modal abierto (clase hidden removida)', 'success'));
+                } else {
+                    logDiv.appendChild(log('❌ Modal no encontrado en el DOM', 'error'));
+                }
+
+            } catch (error) {
+                logDiv.appendChild(log(`❌ Error: ${error.message}`, 'error'));
+            }
+        }
+
+        function verificarModalEstado() {
+            const logDiv = document.getElementById('log-modal');
+            logDiv.innerHTML = '';
+
+            const modal = document.getElementById('editModal');
+            if (!modal) {
+                logDiv.appendChild(log('❌ Modal no encontrado', 'error'));
+                return;
+            }
+
+            logDiv.appendChild(log('✓ Modal encontrado', 'success'));
+            logDiv.appendChild(log(`ID: ${modal.id}`, 'info'));
+            logDiv.appendChild(log(`Clases: ${modal.className}`, 'info'));
+            logDiv.appendChild(log(`Display CSS: ${window.getComputedStyle(modal).display}`, 'info'));
+            logDiv.appendChild(log(`Está oculto (hidden): ${modal.classList.contains('hidden') ? 'SÍ' : 'NO'}`, 
+                modal.classList.contains('hidden') ? 'warning' : 'success'));
+
+            const form = document.getElementById('editForm');
+            if (form) {
+                logDiv.appendChild(log('✓ Formulario encontrado', 'success'));
+            } else {
+                logDiv.appendChild(log('❌ Formulario no encontrado', 'error'));
+            }
+
+            // Botones
+            const closeBtn = document.querySelector('.close-btn');
+            const cancelBtn = document.getElementById('cancelBtn');
+            logDiv.appendChild(log(`Botón cerrar: ${closeBtn ? '✓' : '❌'}`, closeBtn ? 'success' : 'error'));
+            logDiv.appendChild(log(`Botón cancelar: ${cancelBtn ? '✓' : '❌'}`, cancelBtn ? 'success' : 'error'));
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Edición de Artículos</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Courier New', monospace;
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: #252526;
+            border: 1px solid #3e3e42;
+            border-radius: 5px;
+            padding: 20px;
+        }
+        h1 { color: #4ec9b0; margin-bottom: 20px; }
+        h2 { color: #9cdcfe; margin-top: 20px; margin-bottom: 10px; }
+        button {
+            background: #007acc;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 3px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover { background: #005a9e; }
+        .log { background: #1e1e1e; padding: 10px; margin: 10px 0; border-radius: 3px; max-height: 200px; overflow-y: auto; }
+        .success { color: #4ec9b0; }
+        .error { color: #f48771; }
+        .info { color: #569cd6; }
+        code { background: #1e1e1e; padding: 2px 6px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 Test Edición de Artículos</h1>
+        
+        <h2>1. Diagnosticar Modal</h2>
+        <button onclick="diagnosticarModal()">📋 Diagnosticar Modal</button>
+        <div class="log" id="log-modal"></div>
+        
+        <h2>2. Obtener Artículos</h2>
+        <button onclick="obtenerArticulos()">📥 Obtener Artículos</button>
+        <div class="log" id="log-articulos"></div>
+        
+        <h2>3. Probar Edición</h2>
+        <button onclick="probarEdicion()">✏️ Probar Edición del Primer Artículo</button>
+        <div class="log" id="log-edicion"></div>
+        
+        <h2>4. Verificar Funciones</h2>
+        <button onclick="verificarFunciones()">🔍 Verificar Funciones</button>
+        <div class="log" id="log-funciones"></div>
+    </div>
+    
+    <script>
+        const API_BASE = 'http://localhost:3001/api';
+        let articulos = [];
+        
+        function log(mensaje, tipo = 'info') {
+            console.log(mensaje);
+            const color = tipo === 'success' ? '#4ec9b0' : tipo === 'error' ? '#f48771' : '#569cd6';
+            const span = document.createElement('div');
+            span.style.color = color;
+            span.innerHTML = `[${new Date().toLocaleTimeString()}] ${mensaje}`;
+            return span;
+        }
+        
+        function diagnosticarModal() {
+            const logDiv = document.getElementById('log-modal');
+            logDiv.innerHTML = '';
+            
+            // Verificar elemento modal
+            const modal = document.getElementById('editModal');
+            logDiv.appendChild(log(`Modal elemento: ${modal ? '✓ Encontrado' : '✗ No encontrado'}`, modal ? 'success' : 'error'));
+            
+            if (!modal) return;
+            
+            // Verificar clases
+            logDiv.appendChild(log(`Modal clases: ${modal.className}`, 'info'));
+            logDiv.appendChild(log(`Modal oculto: ${modal.classList.contains('hidden') ? 'Sí' : 'No'}`, 'info'));
+            
+            // Verificar formulario
+            const form = document.getElementById('editForm');
+            logDiv.appendChild(log(`Formulario: ${form ? '✓ Encontrado' : '✗ No encontrado'}`, form ? 'success' : 'error'));
+            
+            // Verificar botón cerrar
+            const closeBtn = document.querySelector('.close-btn');
+            logDiv.appendChild(log(`Botón cerrar: ${closeBtn ? '✓ Encontrado' : '✗ No encontrado'}`, closeBtn ? 'success' : 'error'));
+            
+            // Verificar campos
+            const campos = ['editId', 'editTitle', 'editDescription', 'editBody', 'editAuthor'];
+            campos.forEach(id => {
+                const campo = document.getElementById(id);
+                logDiv.appendChild(log(`Campo ${id}: ${campo ? '✓' : '✗'}`, campo ? 'success' : 'error'));
+            });
+            
+            // Intentar abrir modal
+            logDiv.appendChild(log('---', 'info'));
+            logDiv.appendChild(log('Intentando abrir modal...', 'info'));
+            if (modal) {
+                modal.classList.remove('hidden');
+                logDiv.appendChild(log('✓ Modal abierto (clase hidden removida)', 'success'));
+            }
+        }
+        
+        async function obtenerArticulos() {
+            const logDiv = document.getElementById('log-articulos');
+            logDiv.innerHTML = '';
+            
+            try {
+                const response = await fetch(`${API_BASE}/articulos`);
+                const data = await response.json();
+                
+                logDiv.appendChild(log(`✓ Conexión exitosa`, 'success'));
+                logDiv.appendChild(log(`Total de artículos: ${data.data?.length || 0}`, 'info'));
+                
+                if (data.data && data.data.length > 0) {
+                    articulos = data.data;
+                    data.data.slice(0, 2).forEach((art, i) => {
+                        logDiv.appendChild(log(`${i+1}. ID: ${art.id}, Título: ${art.titulo || art.title}`, 'info'));
+                    });
+                }
+            } catch (error) {
+                logDiv.appendChild(log(`✗ Error: ${error.message}`, 'error'));
+            }
+        }
+        
+        function probarEdicion() {
+            const logDiv = document.getElementById('log-edicion');
+            logDiv.innerHTML = '';
+            
+            if (articulos.length === 0) {
+                logDiv.appendChild(log('Primero carga los artículos (botón 2)', 'error'));
+                return;
+            }
+            
+            const articulo = articulos[0];
+            logDiv.appendChild(log(`Editando: "${articulo.titulo || articulo.title}"`, 'info'));
+            
+            // Simular abrirEdicion
+            try {
+                document.getElementById('editId').value = articulo.id || '';
+                document.getElementById('editTitle').value = articulo.titulo || articulo.title || '';
+                document.getElementById('editDescription').value = articulo.descripcion || articulo.description || '';
+                document.getElementById('editBody').value = articulo.cuerpo || articulo.body || '';
+                document.getElementById('editAuthor').value = articulo.autor || articulo.author || '';
+                
+                logDiv.appendChild(log('✓ Campos del formulario rellenados', 'success'));
+                
+                // Abrir modal
+                const modal = document.getElementById('editModal');
+                if (modal) {
+                    modal.classList.remove('hidden');
+                    logDiv.appendChild(log('✓ Modal abierto (visible en pantalla)', 'success'));
+                } else {
+                    logDiv.appendChild(log('✗ Modal no encontrado', 'error'));
+                }
+            } catch (error) {
+                logDiv.appendChild(log(`✗ Error: ${error.message}`, 'error'));
+            }
+        }
+        
+        function verificarFunciones() {
+            const logDiv = document.getElementById('log-funciones');
+            logDiv.innerHTML = '';
+            
+            const funciones = [
+                'crearArticulo',
+                'eliminarArticulo',
+                'abrirEdicion',
+                'guardarEdicion',
+                'mostrarSeccion',
+                'cargarArticulos',
+                'abrirModal',
+                'cerrarModal'
+            ];
+            
+            funciones.forEach(f => {
+                const existe = typeof window[f] === 'function';
+                logDiv.appendChild(log(`${f}: ${existe ? '✓' : '✗'}`, existe ? 'success' : 'error'));
+            });
+        }
+    </script>
+</body>
+</html>

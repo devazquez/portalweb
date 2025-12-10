@@ -148,10 +148,15 @@ export const fetchCMSContent = async (params = {}) => {
     const items = response.data.data || response.data
     const sanitizedData = (Array.isArray(items) ? items : []).map(item => ({
       id: item.id,
-      title: item.title || '',
-      body: item.body || '',
-      description: item.description || '',
-      source: 'cms'
+      title: item.title || item.titulo || '',
+      description: item.description || item.descripcion || '',
+      body: item.body || item.cuerpo || '',
+      author: item.author || item.autor || 'Autor desconocido',
+      created: item.createdAt || item.fecha || new Date().toISOString(),
+      type: 'Artículo',
+      source: 'cms',
+      image_url: null,
+      tags: item.tags || []
     }))
     return sanitizedData
   } catch (error) {
@@ -174,10 +179,15 @@ export const fetchCMSContentById = async (id) => {
     const item = response.data.data || response.data
     return {
       id: item.id,
-      title: item.title || '',
-      body: item.body || '',
-      description: item.description || '',
-      source: 'cms'
+      title: item.title || item.titulo || '',
+      description: item.description || item.descripcion || '',
+      body: item.body || item.cuerpo || '',
+      author: item.author || item.autor || 'Autor desconocido',
+      created: item.createdAt || item.fecha || new Date().toISOString(),
+      type: 'Artículo',
+      source: 'cms',
+      image_url: null,
+      tags: item.tags || []
     }
   } catch (error) {
     throw error

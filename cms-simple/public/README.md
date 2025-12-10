@@ -1,5 +1,7 @@
 # Panel Administrativo - CMS Simple
 
+> **Versión 1.1** - Incluye fix para error "articulos is not iterable"
+
 ## 📁 Estructura de Archivos
 
 ```
@@ -15,6 +17,7 @@ public/
 ### Requisitos
 - Servidor Node.js ejecutándose en `http://localhost:3001`
 - Navegador web moderno (Chrome, Firefox, Safari, Edge)
+- **Nota:** Si ves error "articulos is not iterable", ver [FIX v1.1](#fix-v11)
 
 ### Acceso
 1. Inicia el servidor CMS:
@@ -26,6 +29,26 @@ public/
    ```
    http://localhost:3001
    ```
+
+## 🔧 Fix v1.1 - "articulos is not iterable"
+
+**Estado:** ✅ CORREGIDO
+
+Si ves este error:
+```
+Error: TypeError: articulos is not iterable
+```
+
+**Solución rápida (2 minutos):**
+1. `npm start`
+2. `Ctrl+Shift+R` en navegador
+3. Intenta crear artículo
+4. ✅ Debería funcionar
+
+**Documentación:**
+- [SOLUCION_RAPIDA_ERROR.md](../../SOLUCION_RAPIDA_ERROR.md)
+- [FIX_ARTICULOS_ITERABLE.md](../../FIX_ARTICULOS_ITERABLE.md)
+- [TROUBLESHOOTING.md](../../TROUBLESHOOTING.md)
 
 ## 📋 Archivos Incluidos
 
