@@ -49,6 +49,8 @@ dist-ssr
 # OS
 Thumbs.db
 
+EMPIEZA_AQUI.txt
+
 # Documentación (excepto README.md)
 *.md
 !README.md
